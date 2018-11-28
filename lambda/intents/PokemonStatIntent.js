@@ -84,25 +84,25 @@ const PokemonStatHandler = {
         let damage, prefix
         if (statType === 'weak') {
           damage = damages.from
-          speech += `Here are the weaknesses. `
           prefix = 'WEAK_'
         } else if (statType === 'strong') {
           damage = damages.to
-          speech += `Here are the strengths. `
           prefix = 'STRONG_'
         } else {
           let e = new CustomError(requestAttributes.t('NOT_FOUND'))
           throw e
         }
 
+        console.log('damages', damages)
+
         let doubSuperEff = utils.getKeyByValue(damage, 4)
-        if (typeof doubSuperEff !== 'undefined') speech += requestAttributes.t(prefix + 'DOUBLE_SUPER', doubSuperEff)
+        if (doubSuperEff.length > 0) speech += requestAttributes.t(prefix + 'DOUBLE_SUPER', doubSuperEff.join(', ').replace(/,(?!.*,)/gmi, ' and'))
         let superEff = utils.getKeyByValue(damage, 2)
-        if (typeof superEff !== 'undefined') speech += requestAttributes.t(prefix + 'SUPER', superEff)
+        if (superEff.length > 0) speech += requestAttributes.t(prefix + 'SUPER', superEff.join(', ').replace(/,(?!.*,)/gmi, ' and'))
         let halfEff = utils.getKeyByValue(damage, 0.5)
-        if (typeof halfEff !== 'undefined') speech += requestAttributes.t(prefix + 'HALF', halfEff)
+        if (halfEff.length > 0) speech += requestAttributes.t(prefix + 'HALF', halfEff.join(', ').replace(/,(?!.*,)/gmi, ' and'))
         let zeroEff = utils.getKeyByValue(damage, 0)
-        if (typeof zeroEff !== 'undefined') speech += requestAttributes.t(prefix + 'NO', zeroEff)
+        if (zeroEff.length > 0) speech += requestAttributes.t(prefix + 'NO', zeroEff.join(', ').replace(/,(?!.*,)/gmi, ' and'))
 
         sessionAttributes.speakOutput = speech
         // sessionAttributes.repromptSpeech = requestAttributes.t('RECIPE_REPEAT_MESSAGE');
