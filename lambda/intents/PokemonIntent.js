@@ -29,6 +29,7 @@ const PokemonHandler = {
         // Get Pokemon types
         let response = await P.getPokemonByName(pokemonName)
         let types = utils.getTypeString(response.types)
+        let s3mp3URL = `https://s3-eu-west-1.amazonaws.com/pokemon-cries/${response.id}.wav`
         let intro = `${pokemonName}, ${types} type. <break time="500ms"/> `
 
         // Get Pokemon description
@@ -45,7 +46,7 @@ const PokemonHandler = {
         let evolve = await P.getEvolutionChainById(speciesId)
 
         console.log(evolve)
-        let evolveStr = utils.getEvolveString(evolve.chain, pokemonName)
+        let evolveStr = utils.getEvolveString(evolve.chain)
         console.log(evolveStr)
 
         let speech = intro + evolveStr + description
@@ -58,7 +59,7 @@ const PokemonHandler = {
 
         return handlerInput.responseBuilder
           .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
-          .addAudioPlayerPlayDirective('REPLACE_ENQUEUED', `https://s3-eu-west-1.amazonaws.com/pokemon-cries/${response.id}.wav`, '0')
+          .addAudioPlayerPlayDirective('REPLACE_ENQUEUED', s3mp3URL, '0')
           .withSimpleCard(cardTitle, speech)
           .getResponse()
       } catch (error) {
