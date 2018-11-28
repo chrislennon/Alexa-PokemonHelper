@@ -6,7 +6,13 @@ function getRandomItem (arrayOfItems) {
 };
 
 function getKeyByValue (object, value) {
-  return Object.keys(object).find(key => object[key] === value)
+  let keyArr = Object.keys(object).map(key => {
+    if (object[key] === value) {
+      return key
+    }
+  })
+  keyArr = keyArr.filter(el => el != null)
+  return keyArr
 }
 
 function slotValue (slot, useId) {
