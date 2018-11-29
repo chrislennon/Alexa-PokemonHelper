@@ -1,13 +1,5 @@
 const utils = require('../helpers/utils')
-const Pokedex = require('pokedex-promise-v2')
-let options = {
-  protocol: process.env.API_PROTO || 'https',
-  hostName: process.env.API_HOST || 'pokeapi.co:443',
-  versionPath: process.env.API_PATH || '/api/v2/',
-  cacheLimit: process.env.API_CACHE || 2 * 1000,
-  timeout: process.env.API_TIMEOUT || 2 * 1000
-}
-let P = new Pokedex(options)
+const pokemon = require('../helpers/pokemon')
 
 const PokemonHandler = {
   canHandle (handlerInput) {
@@ -20,47 +12,20 @@ const PokemonHandler = {
       const sessionAttributes = handlerInput.attributesManager.getSessionAttributes()
 
       const pokemonName = utils.slotValue(handlerInput.requestEnvelope.request.intent.slots.PokemonName)
-      console.log('PokemonName', pokemonName)
-
       const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), pokemonName)
       let speakOutput = ''
 
       try {
-        // Get Pokemon types
-        let response = await P.getPokemonByName(pokemonName)
-        let types = utils.getTypeString(response.types)
-        let s3mp3URL = `https://s3-eu-west-1.amazonaws.com/pokemon-cries/${response.id}.wav`
-        let intro = `${pokemonName}, ${types} type. <break time="500ms"/> `
+        speakOutput = await pokemon.getPokemonTextByName(pokemonName)
 
-        // Get Pokemon description
-        let species = await P.getPokemonSpeciesByName(pokemonName)
-        let textEntry = species.flavor_text_entries.filter(o => o.language.name === 'en').filter(o => o.version.name === 'alpha-sapphire')
-        let description = `${textEntry[0].flavor_text} <break time="500ms"/> `
-
-        // Get Pokemon evolution chain id
-        let speciesEvolve = species.evolution_chain.url
-        let speciesMatch = /.*\/([^\\]+)\//
-        let speciesId = speciesEvolve.match(speciesMatch)[1]
-
-        // Get Pokemon evolution chain
-        let evolve = await P.getEvolutionChainById(speciesId)
-
-        console.log(evolve)
-        let evolveStr = utils.getEvolveString(evolve.chain)
-        console.log(evolveStr)
-
-        let speech = intro + evolveStr + description
-
-        console.log(speech)
-
-        sessionAttributes.speakOutput = speech
+        sessionAttributes.speakOutput = speakOutput
         // sessionAttributes.repromptSpeech = requestAttributes.t('RECIPE_REPEAT_MESSAGE');
         handlerInput.attributesManager.setSessionAttributes(sessionAttributes)
 
         return handlerInput.responseBuilder
           .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
-          .addAudioPlayerPlayDirective('REPLACE_ENQUEUED', s3mp3URL, '0')
-          .withSimpleCard(cardTitle, speech)
+          // .addAudioPlayerPlayDirective('REPLACE_ENQUEUED', s3mp3URL, '0')
+          .withSimpleCard(cardTitle, speakOutput)
           .getResponse()
       } catch (error) {
         console.log('There was an ERROR: ', error)
