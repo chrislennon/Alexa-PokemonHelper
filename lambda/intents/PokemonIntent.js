@@ -13,7 +13,7 @@ const PokemonHandler = {
 
       const pokemonName = utils.slotValue(handlerInput.requestEnvelope.request.intent.slots.PokemonName)
       const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), pokemonName)
-      let speakOutput = ''
+      let speakOutput = '<speak>'
 
       try {
         speakOutput = await pokemon.getPokemonTextByName(pokemonName)
@@ -38,6 +38,7 @@ const PokemonHandler = {
         }
         speakOutput += repromptSpeech
 
+        speakOutput += '</speak>'
         sessionAttributes.speakOutput = speakOutput // saving speakOutput to attributes, so we can use it to repeat
         sessionAttributes.repromptSpeech = repromptSpeech
 

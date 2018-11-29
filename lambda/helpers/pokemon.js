@@ -14,7 +14,9 @@ async function getPokemonTextByName (pokemonName) {
   let response = await P.getPokemonByName(pokemonName)
   let types = utils.getTypeString(response.types)
   let pokemonId = response.id
-  // let s3mp3URL = `https://s3-eu-west-1.amazonaws.com/pokemon-cries/${response.id}.wav`
+  let cryFilename = ('000' + response.id).slice(-3)
+  let pokemonCry = `<audio src='https://s3-eu-west-1.amazonaws.com/pokemon-cries/${cryFilename}.mp3' /> `
+  // pokemonCry = ''
 
   // Get Pokemon description
   let species = await P.getPokemonSpeciesByName(pokemonName)
@@ -34,6 +36,7 @@ async function getPokemonTextByName (pokemonName) {
   console.log(evolveStr)
 
   let speech = `${pokemonName}. <break time="300ms"/> 
+  ${pokemonCry} <break time="300ms"/> 
   Number ${pokemonId}. <break time="300ms"/> 
   ${genusText}. <break time="300ms"/> 
   ${types} type. <break time="300ms"/> 
